@@ -1,11 +1,6 @@
----FILEPATH \requirements.txt
----FIND
-```
-```
----REPLACE
-```
+
 pytest
-unittest
 colorama>=0.4.4
-```
----COMPLETE
+colorama>=0.4.4
+plyer>=2.0.0
+
