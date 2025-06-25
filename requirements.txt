@@ -6,5 +6,6 @@
 ```
 pytest
 unittest
+colorama>=0.4.4
 ```
 ---COMPLETE

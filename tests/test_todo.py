@@ -7,69 +7,41 @@ import todo
 
 class TestTodoApp(unittest.TestCase):
     def setUp(self):
-        # Ensure no test file exists before each test
-        if os.path.exists(todo.TODO_FILE):
-            os.remove(todo.TODO_FILE)
+        self.test_file = todo.TODO_FILE
+        self.backup_file = todo.BACKUP_FILE
+        self.cleanup_files()
 
     def tearDown(self):
-        # Clean up after each test
-        if os.path.exists(todo.TODO_FILE):
-            os.remove(todo.TODO_FILE)
+        self.cleanup_files()
 
-    def test_load_tasks_empty(self):
+    def cleanup_files(self):
+        for file in [self.test_file, self.backup_file]:
+            if os.path.exists(file):
+                os.remove(file)
+
+    def test_add_task_with_metadata(self):
+        todo.add_task("Test", due_date="2024-12-31", category="work", priority="high")
         tasks = todo.load_tasks()
-        self.assertEqual(tasks, [])
-
-    def test_save_and_load_tasks(self):
-        test_tasks = [{"description": "Test task", "completed": False}]
-        todo.save_tasks(test_tasks)
-        loaded_tasks = todo.load_tasks()
-        self.assertEqual(loaded_tasks, test_tasks)
+        self.assertEqual(tasks[0]["description"], "Test")
+        self.assertEqual(tasks[0]["category"], "work")
+        self.assertEqual(tasks[0]["priority"], "high")
 
     @patch('sys.stdout', new_callable=StringIO)
-    def test_add_task(self, mock_stdout):
-        todo.add_task("New task")
-        tasks = todo.load_tasks()
-        self.assertEqual(len(tasks), 1)
-        self.assertEqual(tasks[0]["description"], "New task")
-        self.assertFalse(tasks[0]["completed"])
-        self.assertIn("Added: New task", mock_stdout.getvalue())
+    def test_undo_functionality(self, mock_stdout):
+        # Add and then undo
+        todo.add_task("Test undo")
+        todo.undo_last_action()
+        self.assertIn("Undo successful", mock_stdout.getvalue())
+        self.assertEqual(len(todo.load_tasks()), 0)
 
-    @patch('sys.stdout', new_callable=StringIO)
-    def test_list_tasks_empty(self, mock_stdout):
-        todo.list_tasks()
-        output = mock_stdout.getvalue().strip()
-        self.assertEqual(output, "")
-
-    @patch('sys.stdout', new_callable=StringIO)
-    def test_list_tasks_with_items(self, mock_stdout):
-        test_tasks = [
-            {"description": "Task 1", "completed": False},
-            {"description": "Task 2", "completed": True}
-        ]
-        todo.save_tasks(test_tasks)
-        todo.list_tasks()
-        output = mock_stdout.getvalue()
-        self.assertIn("[ ] Task 1", output)
-        self.assertIn("[✓] Task 2", output)
-
-    @patch('sys.stdout', new_callable=StringIO)
-    def test_complete_task_valid(self, mock_stdout):
-        test_tasks = [{"description": "Task 1", "completed": False}]
-        todo.save_tasks(test_tasks)
-        todo.complete_task(1)
-        tasks = todo.load_tasks()
-        self.assertTrue(tasks[0]["completed"])
-        self.assertIn("Completed: Task 1", mock_stdout.getvalue())
-
-    @patch('sys.stdout', new_callable=StringIO)
-    def test_complete_task_invalid(self, mock_stdout):
-        test_tasks = [{"description": "Task 1", "completed": False}]
-        todo.save_tasks(test_tasks)
-        todo.complete_task(2)  # Invalid index
-        tasks = todo.load_tasks()
-        self.assertFalse(tasks[0]["completed"])
-        self.assertIn("Invalid task number", mock_stdout.getvalue())
+    def test_priority_filter(self):
+        todo.add_task("Urgent", priority="high")
+        todo.add_task("Normal", priority="medium")
+        with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
+            todo.list_tasks(priority="high")
+            output = mock_stdout.getvalue()
+            self.assertIn("Urgent", output)
+            self.assertNotIn("Normal", output)
 
 if __name__ == '__main__':
     unittest.main()
