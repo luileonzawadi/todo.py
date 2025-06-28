@@ -3,4 +3,5 @@ pytest
 colorama>=0.4.4
 colorama>=0.4.4
 plyer>=2.0.0
+rich>=13.0.0
 
