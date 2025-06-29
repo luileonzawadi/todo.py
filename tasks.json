@@ -1,7 +1,7 @@
 [
   {
     "description": "Buy milk",
-    "completed": false,
+    "completed": true,
     "due_date": "2024-06-30",
     "category": "shopping",
     "priority": "medium",
@@ -38,5 +38,12 @@
     "category": "shopping",
     "priority": "high",
     "created_at": "2025-06-25T19:56:25.390508"
+  },
+  {
+    "description": "Finish AWS",
+    "due_date": "2025-06-29",
+    "priority": "high",
+    "category": "Daily Dose",
+    "completed": false
   }
 ]

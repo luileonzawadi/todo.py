@@ -240,7 +240,7 @@ class TodoApp(ThemedTk):
         self.refresh_table()
 
     def toggle_theme(self):
-        current = self.get_theme()
+        current = self.theme_use()
         self.set_theme("arc" if current == "black" else "black")
 
 # Run
